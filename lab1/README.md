@@ -21,7 +21,7 @@ This lab demonstrates building and packaging a Java application using Gradle, ru
 #### 1.1 Download and Install Gradle
 ```bash
 sudo wget services.gradle.org/distributions/gradle-8.5-bin.zip -P /tmp
-sudo unzip -d /opt/gradle /tmp/gradle-8.5-bin.zip#### 1.1 Verifying Gradle Installation
+sudo unzip -d /opt/gradle /tmp/gradle-8.5-bin.zip
 ```
 #### 1.2 Configure Gradle Environment Variables
 ```bash
