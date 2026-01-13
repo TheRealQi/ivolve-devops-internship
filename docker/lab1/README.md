@@ -1,4 +1,4 @@
-# Lab 3: Run Java Spring Boot App in a Container
+# Docker Lab 1: Run Java Spring Boot App in a Container
 
 This lab demonstrates how to containerize a **Spring Boot** application using **Docker**, build a Docker image, run a container, and test the application.
 
