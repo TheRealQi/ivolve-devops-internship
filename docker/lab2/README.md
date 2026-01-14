@@ -34,8 +34,6 @@ git clone https://github.com/Ibrahim-Adel15/Docker-1.git
 ---
 ### 2. Build the Application
 
-Create a file named `Dockerfile` with the following content:
-
 ```bash
 mvn package
 ```
