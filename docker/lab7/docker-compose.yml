@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "8000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0.44-debian
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ivolve
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
