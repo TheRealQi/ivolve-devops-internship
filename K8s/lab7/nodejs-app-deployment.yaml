@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+  namespace: ivolve
+spec:
+  selector:
+    matchLabels:
+      app: nodejs
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      initContainers:
+        - name: init-mysql
+          image: mysql:8.0
+          envFrom:
+            - configMapRef:
+                name: mysql-config
+            - secretRef:
+                name: mysql-secret
+          command:
+            - sh
+            - -c
+            - |
+              mysql -h"$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS ivolve;"
+              mysql -h"$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+              mysql -h"$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON ivolve.* TO '$DB_USER'@'%';"
+              mysql -h"$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+      containers:
+        - name: nodejs
+          image: therealqi/ivolve-nodejs-app:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+          - configMapRef:
+              name: mysql-config
+          - secretRef:
+              name: mysql-secret
+          volumeMounts:
+            - name: app-logs
+              mountPath: /app/logs
+      tolerations:
+        - key: "node"
+          operator: "Equal"
+          value: "worker"
+          effect: "NoSchedule"
+      volumes:
+        - name: app-logs
+          persistentVolumeClaim:
+            claimName: app-logs-pvc
