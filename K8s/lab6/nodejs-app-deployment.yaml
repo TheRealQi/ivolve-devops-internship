@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+  namespace: ivolve
+spec:
+  selector:
+    matchLabels:
+      app: nodejs
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      containers:
+        - name: nodejs
+          image: therealqi/ivolve-nodejs-app:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+          - configMapRef:
+              name: mysql-config
+          - secretRef:
+              name: mysql-secret
+          volumeMounts:
+            - name: app-logs
+              mountPath: /app/logs
+      tolerations:
+        - key: "node"
+          operator: "Equal"
+          value: "worker"
+          effect: "NoSchedule"
+      volumes:
+        - name: app-logs
+          persistentVolumeClaim:
+            claimName: app-logs-pvc
