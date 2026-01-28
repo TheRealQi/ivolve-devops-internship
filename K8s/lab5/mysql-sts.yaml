@@ -4,7 +4,7 @@ metadata:
   name: mysql
   namespace: ivolve
 spec:
-  serviceName: mysql
+  serviceName: mysql-service
   selector:
     matchLabels:
       app: mysql
