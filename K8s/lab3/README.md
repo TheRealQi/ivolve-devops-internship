@@ -18,7 +18,7 @@ This lab demonstrates how to manage configurations and sensitive data using Kube
 
 ## Steps and Screenshots
 
-### 0. Prerequisites:
+### 0. Requisite:
 - Namespace `ivolve` exists, which is created in a previous Kubernetes lab.
 
 ### 1. Create the ConfigMap
