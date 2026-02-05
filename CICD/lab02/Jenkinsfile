@@ -2,7 +2,6 @@ pipeline {
     agent any
     environment {
         APP_NAME = "jenkins-lab02"
-        BUILD_NUMBER = "${BUILD_NUMBER}"
         DOCKERHUB_CRED = credentials('dockerhub-creds')
     }
     stages {
@@ -13,21 +12,21 @@ pipeline {
             sh 'mvn package -DskipTests'
         }
         stage('Build Docker Image') {
-            sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .''
+            sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .'
         }
         stage('Push Docker Image') {
             sh '''
                 echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER}
-                docker push ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER}
+                docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
+                docker push ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
             '''
         }
         stage('Remove Local Docker Image') {
-            sh 'docker rmi ${APP_NAME}:latest || true'
-            sh 'docker rmi ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER} || true'
+            sh 'docker rmi ${APP_NAME}:${BUILD_NUMBER} || true'
+            sh 'docker rmi ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest || true'
         }
         stage('Update Deployment YAML') {
-            echo 'echo "Editing Deployment YAML"'
+            sh 'echo "Editing Deployment YAML"'
         }
         stage('Deploy on K8s') {
             sh 'kubectl get pod -n ivolve'
@@ -35,13 +34,13 @@ pipeline {
     }
     post {
         always {
-            echo 'Pipeline finished.'
+            sh 'echo "Pipeline finished."'
         }
         success {
-            echo 'Pipeline succeeded!'
+            sh 'echo "Pipeline succeeded!"'
         }
         failure {
-            echo 'Pipeline failed.'
+            sh 'echo "Pipeline failed"'
         }
     }
 }
