@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    environment {
+        APP_NAME = "jenkins-lab02"
+        BUILD_NUMBER = "${BUILD_NUMBER}"
+        DOCKERHUB_CRED = credentials('dockerhub-creds')
+    }
+    stages {
+        stage('Run Unit Tests') {
+            sh 'mvn test'
+        }
+        stage('Build App.') {
+            sh 'mvn package -DskipTests'
+        }
+        stage('Build Docker Image') {
+            sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .''
+        }
+        stage('Push Docker Image') {
+            sh '''
+                echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
+                docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER}
+                docker push ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER}
+            '''
+        }
+        stage('Remove Local Docker Image') {
+            sh 'docker rmi ${APP_NAME}:latest || true'
+            sh 'docker rmi ${DOCKERHUB_CRED_USR}/${APP_NAME}:${BUILD_NUMBER} || true'
+        }
+        stage('Update Deployment YAML') {
+            echo 'echo "Editing Deployment YAML"'
+        }
+        stage('Deploy on K8s') {
+            sh 'kubectl get pod -n ivolve'
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
