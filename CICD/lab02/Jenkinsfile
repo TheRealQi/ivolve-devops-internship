@@ -6,41 +6,51 @@ pipeline {
     }
     stages {
         stage('Run Unit Tests') {
-            sh 'mvn test'
+            steps {
+                sh 'mvn test'
+            }
         }
-        stage('Build App.') {
-            sh 'mvn package -DskipTests'
+        stage('Build App') {
+            steps {
+                sh 'mvn package -DskipTests'
+            }
         }
         stage('Build Docker Image') {
-            sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .'
+            steps {
+                sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .'
+            }
         }
         stage('Push Docker Image') {
-            sh '''
-                echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
-                docker push ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
-            '''
+            steps {
+                sh '''
+                    echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
+                    docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
+                    docker push ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest
+                '''
+            }
         }
         stage('Remove Local Docker Image') {
-            sh 'docker rmi ${APP_NAME}:${BUILD_NUMBER} || true'
-            sh 'docker rmi ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest || true'
+            steps {
+                sh 'docker rmi ${APP_NAME}:${BUILD_NUMBER} || true'
+                sh 'docker rmi ${APP_NAME}:latest || true'
+                sh 'docker rmi ${DOCKERHUB_CRED_USR}/${APP_NAME}:latest || true'
+            }
         }
         stage('Update Deployment YAML') {
-            sh 'echo "Editing Deployment YAML"'
+            steps {
+                sh 'echo "Editing Deployment YAML"'
+            }
         }
         stage('Deploy on K8s') {
-            sh 'kubectl get pod -n ivolve'
+            steps {
+                sh 'kubectl get pods -n ivolve'
+            }
         }
     }
     post {
-        always {
-            sh 'echo "Pipeline finished."'
-        }
-        success {
-            sh 'echo "Pipeline succeeded!"'
-        }
-        failure {
-            sh 'echo "Pipeline failed"'
-        }
+        always { echo "Pipeline finished." }
+        success { echo "Pipeline succeeded!" }
+        failure { echo "Pipeline failed!" }
     }
 }
+
