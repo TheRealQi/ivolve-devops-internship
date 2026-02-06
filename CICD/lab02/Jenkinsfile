@@ -54,10 +54,13 @@ pipeline {
         }
         stage('Deploy on K8s') {
             steps {
-                dir(env.WORKDIR) {
-                    sh '''
-                  kubectl apply -f app-deployment.yaml
-                '''
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    dir(env.WORKDIR) {
+                        sh '''
+                        export KUBECONFIG=$KUBECONFIG_FILE
+                        kubectl apply -f app-deployment.yaml
+                        '''
+                    }
                 }
             }
         }
