@@ -1,9 +1,3 @@
-def call(String imageRepo, String imageName, String imageTag) {
-    sh 'echo "Scanning image ${imageRepo}/${imageName}:${imageTag} for vulnerabilities..."'
-    sh 'trivy image --severity HIGH,CRITICAL --no-progress --format table ${imageRepo}/${imageName}:${imageTag}'
-}
-
-
 pipeline {
     agent { label 'java-docker' }
     environment {
