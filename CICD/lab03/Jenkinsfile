@@ -37,7 +37,7 @@ pipeline {
         }
         stage('Remove Local Docker Image') {
             steps {
-                RemoveLocalImage(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+                RemoveImageLocally(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
             }
         }
         stage('Deploy on K8s') {
