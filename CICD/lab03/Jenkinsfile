@@ -3,7 +3,7 @@ pipeline {
     agent { label 'java-docker' }
     environment {
         IMAGE_REPO = "therealqi"
-        IMAGE_NAME = "jenkins-lab02"
+        IMAGE_NAME = "jenkins-lab03"
         IMAGE_TAG = "${BUILD_NUMBER}"
         WORKDIR = "CICD/lab03"
     }
