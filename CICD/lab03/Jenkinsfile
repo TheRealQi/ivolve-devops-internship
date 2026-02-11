@@ -1,0 +1,64 @@
+@Library('cicd-shared-lib') _
+pipeline {
+    agent { label 'java-docker' }
+    environment {
+        IMAGE_REPO = "therealqi"
+        IMAGE_NAME = "jenkins-lab02"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        WORKDIR = "CICD/lab03"
+    }
+    stages {
+        stage('Run Unit Tests') {
+            steps {
+                RunUnitTests(env.WORKDIR)
+            }
+        }
+        stage('Build App') {
+            steps {
+                BuildApp(env.WORKDIR)
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                BuildImage(env.WORKDIR, IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+            }
+        }
+        stage('Scan Docker Image') {
+            steps {
+                ScanImage(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    PushImage(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+                }
+            }
+        }
+        stage('Remove Local Docker Image') {
+            steps {
+                RemoveLocalImage(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+            }
+        }
+        stage('Deploy on K8s') {
+            steps {
+                withCredentials([
+                        string(credentialsId: 'jenkins-k8s-token', variable: 'BEARER_TOKEN'),
+                ]) {
+                    DeployOnK8s(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo "Pipeline finished."
+        }
+        success {
+            echo "Pipeline succeeded!"
+        }
+        failure {
+            echo "Pipeline failed!"
+        }
+    }
+}
