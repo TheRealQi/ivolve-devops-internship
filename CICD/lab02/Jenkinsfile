@@ -1,3 +1,9 @@
+def call(String imageRepo, String imageName, String imageTag) {
+    sh 'echo "Scanning image ${imageRepo}/${imageName}:${imageTag} for vulnerabilities..."'
+    sh 'trivy image --severity HIGH,CRITICAL --no-progress --format table ${imageRepo}/${imageName}:${imageTag}'
+}
+
+
 pipeline {
     agent { label 'java-docker' }
     environment {
@@ -54,11 +60,12 @@ pipeline {
         }
         stage('Deploy on K8s') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                withCredentials([
+                        string(credentialsId: 'jenkins-k8s-token', variable: 'BEARER_TOKEN'),
+                ]) {
                     dir(env.WORKDIR) {
                         sh '''
-                        export KUBECONFIG=$KUBECONFIG_FILE
-                        kubectl apply -f app-deployment.yaml
+                        kubectl --server=$K8S_API_SERVER --token=$BEARER_TOKEN  apply -f app-deployment.yaml
                         '''
                     }
                 }
