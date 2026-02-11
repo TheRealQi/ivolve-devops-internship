@@ -65,7 +65,7 @@ pipeline {
                 ]) {
                     dir(env.WORKDIR) {
                         sh '''
-                        kubectl --server=$K8S_API_SERVER --token=$BEARER_TOKEN  apply -f app-deployment.yaml
+                        kubectl --server=$K8S_API_SERVER --token=$BEARER_TOKEN --insecure-skip-tls-verify apply -f app-deployment.yaml
                         '''
                     }
                 }
