@@ -45,7 +45,7 @@ pipeline {
                 withCredentials([
                         string(credentialsId: 'jenkins-k8s-token', variable: 'BEARER_TOKEN'),
                 ]) {
-                    DeployOnK8s(IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
+                    DeployOnK8s(WORKDIR, IMAGE_REPO, IMAGE_NAME, IMAGE_TAG)
                 }
             }
         }
